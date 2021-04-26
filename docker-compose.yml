@@ -1,0 +1,97 @@
+version: '3.7'
+networks:
+  backend:
+    name: skadi-backend
+
+services:
+  timesketch-web:
+    image: us-docker.pkg.dev/osdfir-registry/timesketch/timesketch:${TIMESKETCH_VERSION}
+    environment:
+      - NUM_WSGI_WORKERS=${NUM_WSGI_WORKERS}
+    restart: always
+    networks:
+      - backend
+    command: timesketch-web
+    volumes:
+      - ./etc/timesketch:/etc/timesketch/
+      - ./upload:/usr/share/timesketch/upload/
+      - ./logs:/var/log/timesketch/
+
+  timesketch-worker:
+    image: us-docker.pkg.dev/osdfir-registry/timesketch/timesketch:${TIMESKETCH_VERSION}
+    environment:
+      - WORKER_LOG_LEVEL=${WORKER_LOG_LEVEL}
+    restart: always
+    networks:
+      - backend
+    command: timesketch-worker
+    volumes:
+      - ./etc/timesketch:/etc/timesketch/
+      - ./upload:/usr/share/timesketch/upload/
+      - ./logs:/var/log/timesketch/
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - TAKE_FILE_OWNERSHIP=1
+      - ES_JAVA_OPTS=-Xms${ELASTIC_MEM_USE_GB}g -Xmx${ELASTIC_MEM_USE_GB}g
+    networks:
+      - backend
+    restart: always
+    ports:
+      - 9200:9200
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data/
+
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    environment:
+      - POSTGRES_USER=timesketch
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - backend
+    restart: always
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    networks:
+      - backend
+    command: "redis-server"
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.12.0
+    container_name: kibana
+    networks:
+      - backend
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200 
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200 
+    restart: unless-stopped
+    expose:
+      - "5601"
+    ports:
+      - 5601:5601
+
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    networks:
+      - backend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./etc/nginx.conf:/etc/nginx/nginx.conf
+
+  cyberchef:
+    image: aorlikoski/skadi_cyberchef:20190326
+    container_name: cyberchef
+    networks:
+      - backend
+    restart: unless-stopped
