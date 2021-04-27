@@ -41,10 +41,10 @@ if ! command -v docker-compose; then
 fi
 
 # Exit early if there are Timesketch containers already running.
-if [ ! -z "$(docker ps | grep timesketch)" ]; then
-  echo "ERROR: Timesketch containers already running."
-  exit 1
-fi
+#if [ ! -z "$(docker ps | grep timesketch)" ]; then
+#  echo "ERROR: Timesketch containers already running."
+#  exit 1
+#fi
 
 # Tweak for Elasticsearch
 echo "* Setting vm.max_map_count for Elasticsearch"
