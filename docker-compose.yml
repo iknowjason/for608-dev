@@ -95,3 +95,5 @@ services:
     networks:
       - backend
     restart: unless-stopped
+    ports:
+      - 8000:8000
