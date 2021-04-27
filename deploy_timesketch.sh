@@ -107,11 +107,13 @@ sed -i 's#postgresql://<USERNAME>:<PASSWORD>@localhost#postgresql://'$POSTGRES_U
 sed -i 's#^POSTGRES_PASSWORD=#POSTGRES_PASSWORD='$POSTGRES_PASSWORD'#' timesketch/config.env
 sed -i 's#^ELASTIC_MEM_USE_GB=#ELASTIC_MEM_USE_GB='$ELASTIC_MEM_USE_GB'#' timesketch/config.env
 
-ln -s ./config.env ./timesketch/.env
-echo "OK"
+if [ ! -L ./timesketch/.env ]; then
+  ln -s ./config.env ./timesketch/.env
+  echo "OK"
+fi
 echo "* Installation done."
 
-echo
+
 echo "Start the system:"
 echo "1. cd timesketch"
 echo "2. docker-compose up -d"
