@@ -22,10 +22,10 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Exit early if a timesketch directory already exists.
-if [ -d "./timesketch" ]; then
-  echo "ERROR: Timesketch directory already exist."
-  exit 1
-fi
+#if [ -d "./timesketch" ]; then
+#  echo "ERROR: Timesketch directory already exist."
+#  exit 1
+#fi
 
 # Exit early if docker is not available.
 if [ "$(systemctl is-active docker)" != "active" ]; then
