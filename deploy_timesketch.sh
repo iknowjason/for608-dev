@@ -67,14 +67,15 @@ ELASTIC_PORT=9200
 REDIS_ADDRESS="redis"
 REDIS_PORT=6379
 GITHUB_BASE_URL="https://raw.githubusercontent.com/google/timesketch/master"
+GITHUB_FORE_URL="https://raw.githubusercontent.com/iknowjason/for608-dev/main"
 ELASTIC_MEM_USE_GB=$(cat /proc/meminfo | grep MemTotal | awk '{printf "%.0f", ($2 / 1000000 / 2)}')
 echo "OK"
 echo "* Setting Elasticsearch memory allocation to ${ELASTIC_MEM_USE_GB}GB"
 
 # Docker compose and configuration
-#echo -n "* Fetching configuration files.."
-#curl -s $GITHUB_BASE_URL/docker/release/docker-compose.yml > timesketch/docker-compose.yml
-#curl -s $GITHUB_BASE_URL/docker/release/config.env > timesketch/config.env
+echo -n "* Fetching configuration files.."
+curl -s $GITHUB_FORE_URL/config.env > timesketch/config.env
+echo "Just downloaded"
 
 # Fetch default Timesketch config files
 curl -s $GITHUB_BASE_URL/data/timesketch.conf > timesketch/etc/timesketch/timesketch.conf
@@ -109,9 +110,13 @@ sed -i 's#^ELASTIC_MEM_USE_GB=#ELASTIC_MEM_USE_GB='$ELASTIC_MEM_USE_GB'#' timesk
 
 if [ ! -L ./timesketch/.env ]; then
   ln -s ./config.env ./timesketch/.env
-  echo "OK"
+  echo "Creating .env sym link"
+else
+  echo "Delete sym link and create .env sym link"
+  rm ./timesketch/.env
+  ln -s ./config.env ./timesketch/.env
 fi
-echo "* Installation done."
+#echo "* Installation done."
 
 
 echo "Start the system:"
