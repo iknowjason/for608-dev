@@ -65,7 +65,7 @@ services:
     restart: always
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.12.0
+    image: docker.elastic.co/kibana/kibana:7.10.2
     container_name: kibana
     networks:
       - backend
